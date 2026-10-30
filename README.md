@@ -13,6 +13,10 @@ Seven tasks run hand-designed controllers: depth images become 3-D points, a mod
 a state machine per arm moves the hands. LiftPot runs an ACT policy trained on the demonstrations and fine-tuned in
 simulation. The policy sees only the standard observations, never the simulator state.
 
+<p align="center"><img src="assets/controllers/common_loop.png" width="100%" alt="The feedback loops every controller runs"></p>
+<p align="center"><sub>The loop every controller runs. Each controller's own loops and phase machine:
+<a href="docs/controllers.md">docs/controllers.md</a>.</sub></p>
+
 ## Explainer videos
 
 One episode per controller, step by step: what it sees, the object it fits, its plan, and every phase of both arms.

@@ -2,7 +2,7 @@
 
 Seven of the eight tasks run a hand-designed controller (`submission/policy/hybrid_*.py`); LiftPot runs the learned
 ACT policy. This page explains each controller in depth: what it sees, how it finds the object, what it plans, and the
-phases each arm goes through.
+phases each arm goes through. Each section opens with a diagram of the controller's feedback loops and phase machine.
 
 Every controller has a **full explainer video** (MP4, 38-50 s) in [`assets/videos/`](../assets/videos). Each one walks
 through the controller's perception stage by stage on the observation it actually planned from, then shows its plan and
@@ -29,16 +29,11 @@ submitted code through the evaluator's episode loop.
 
 ## The common recipe
 
-```mermaid
-flowchart LR
-  A["RGB-D images<br/>head + front, 256 x 256"] --> B["3-D points<br/>calibrated cameras"]
-  B --> C["Object pose<br/>fit of its known geometry"]
-  C --> D["Plan<br/>arm roles, grasp and push points"]
-  D --> E["Phase machine per arm<br/>smooth paths, checks"]
-  E --> F["Actions, 20 Hz<br/>end-effector deltas + grippers"]
-  J["Joint angles<br/>forward kinematics"] --> D
-  J --> E
-```
+<p align="center"><img src="../assets/controllers/common_loop.png" width="100%" alt="The feedback loops every controller runs"></p>
+
+Three loops close through the observations: hand poses from the joint angles steer the motion every step (position
+loop), finger openings and hand poses move the phase machine on (phase loop), and the depth images update the object
+estimate (perception loop: how often depends on the controller).
 
 **What a controller reads.** Only the observation dictionary that `act()` receives: the head and front cameras' RGB and
 depth images (256 x 256; `depth: true` in `metadata.yaml`), the joint angles (`proprioception`) and the two finger
@@ -86,6 +81,8 @@ timeline colours phases by kind: free motion, push, close, hold/carry/turn, open
 <p align="center"><img src="../assets/controllers/StackTwoBlocks.gif" width="100%" alt="StackTwoBlocks controller"></p>
 <p align="center"><a href="../assets/videos/StackTwoBlocks.mp4">Full explainer video (MP4, 43 s)</a></p>
 
+<p align="center"><img src="../assets/controllers/StackTwoBlocks_loop.png" width="100%" alt="StackTwoBlocks: feedback loops and phase machine"></p>
+
 **Perception** (`hybrid_s2b.locate`). Red pixels (R > 90, G < 70, B < 70) in both cameras become 3-D points between 0.9
 and 1.4 m height. Starting from the two points farthest apart, a 2-means split on x-y separates the two blocks. Each
 block's top face (points within 6 mm of its highest point) gives the centre; the yaw (mod 90 deg) is the angle of the
@@ -123,6 +120,8 @@ block, one sets its block down at a meeting point mid-table and moves away, the 
 <p align="center"><img src="../assets/controllers/RotateValve.gif" width="100%" alt="RotateValve controller"></p>
 <p align="center"><a href="../assets/videos/RotateValve.mp4">Full explainer video (MP4, 40 s)</a></p>
 
+<p align="center"><img src="../assets/controllers/RotateValve_loop.png" width="100%" alt="RotateValve: feedback loops and phase machine"></p>
+
 **Settling.** The valves are free bodies: they drop about 2.7 mm onto the table in the first step and, in about 1-2% of
 seeds where they spawn overlapping, push each other apart for several steps. The robot stays still, grippers closed,
 until the valve region of both depth images stops changing (two steps in a row with at most 5 changed pixels;
@@ -157,6 +156,8 @@ Success needs each valve past 27 deg of its 270 deg range, so 36 deg leaves marg
 <p align="center"><img src="../assets/controllers/PackBox.gif" width="100%" alt="PackBox controller"></p>
 <p align="center"><a href="../assets/videos/PackBox.mp4">Full explainer video (MP4, 46 s)</a></p>
 
+<p align="center"><img src="../assets/controllers/PackBox_loop.png" width="100%" alt="PackBox: feedback loops and phase machine"></p>
+
 **Perception** (`locate_box`). The box has no free joint, so its pose is estimated once, at the first step. At reset
 only the box occupies the height band 0.70-0.95 m (below the hinges): those depth points are its wall shell, a square
 seen from above. The yaw is the angle of the minimum-area rectangle around the shell, searched over 52-128 deg (1 deg,
@@ -190,6 +191,8 @@ the early lift.
 <p align="center"><img src="../assets/controllers/CubeHandover.gif" width="100%" alt="CubeHandover controller"></p>
 <p align="center"><a href="../assets/videos/CubeHandover.mp4">Full explainer video (MP4, 39 s)</a></p>
 
+<p align="center"><img src="../assets/controllers/CubeHandover_loop.png" width="100%" alt="CubeHandover: feedback loops and phase machine"></p>
+
 **Perception** (`rod_perc.py`). The "cube" is a red rod, 4 x 20 x 4 cm, at any yaw. Red pixels of both cameras become
 3-D points above the table. The rod's top face is the most populated 2 mm height bin: the side faces spread over 4 cm,
 and a few "flying" silhouette pixels can lie up to 4 cm above the rod, so a plain maximum fails. The principal axis of
@@ -222,6 +225,8 @@ stays below the human demonstrations' median.
 <p align="center"><img src="../assets/controllers/LiftTray.gif" width="100%" alt="LiftTray controller"></p>
 <p align="center"><a href="../assets/videos/LiftTray.mp4">Full explainer video (MP4, 38 s)</a></p>
 
+<p align="center"><img src="../assets/controllers/LiftTray_loop.png" width="100%" alt="LiftTray: feedback loops and phase machine"></p>
+
 **Perception** (`lt_perc.py`). The tray's visual mesh (744 vertices, 548 triangles of the released asset,
 `tray_mesh.npz`) as an occupancy grid of 3 mm voxels, registered to the depth points in the tray's height band. The
 tray floor is the most populated height, which fixes the tray's height even at the first observation, when the tray
@@ -251,6 +256,8 @@ distance saturates both shoulders and wrists, and the tray only tilts; about 20 
 
 <p align="center"><img src="../assets/controllers/PickSingleBookFromTable.gif" width="100%" alt="PickBook controller"></p>
 <p align="center"><a href="../assets/videos/PickSingleBookFromTable.mp4">Full explainer video (MP4, 50 s)</a></p>
+
+<p align="center"><img src="../assets/controllers/PickSingleBookFromTable_loop.png" width="100%" alt="PickBook: feedback loops and phase machine"></p>
 
 **The problem.** The book can only be pinched across its thickness: the 8.2 cm gripper cannot span its 9.4 cm width,
 and the pads' effective friction is too low for a corner pinch across the side faces. So one finger has to get under
@@ -288,6 +295,8 @@ under the bookshelf's lower board.
 
 <p align="center"><img src="../assets/controllers/StackSingleBookShelf.gif" width="100%" alt="ShelfBook controller"></p>
 <p align="center"><a href="../assets/videos/StackSingleBookShelf.mp4">Full explainer video (MP4, 47 s)</a></p>
+
+<p align="center"><img src="../assets/controllers/StackSingleBookShelf_loop.png" width="100%" alt="ShelfBook: feedback loops and phase machine"></p>
 
 **Perception** (`ss_perc.py`). As in PickBook, from head depth: a template of the top outline (main block plus ribbon),
 with a spine-face term that pins the near edge, which the push and the pinch depend on. The task's yaw range (+-30 deg)
@@ -343,6 +352,8 @@ python scripts/explainer/compose.py runs/explain/PackBox_900000 --out assets/vid
     --gif assets/controllers/PackBox.gif --ffmpeg ffmpeg
 # 4. once all seven videos exist: the README's trailer GIF and the gallery's poster tiles
 python scripts/explainer/trailer.py --ffmpeg ffmpeg
+# the feedback-loop diagrams (no episode needed)
+python scripts/explainer/loops.py
 ```
 
 `trace.py` accepts training seeds only (>= 10,000). `explain.py` checks that its replayed estimate equals the one the
