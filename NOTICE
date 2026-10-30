@@ -1,0 +1,98 @@
+LocalModels / ACT-bimanual
+Our entry to the CoRL 2026 RoboEval bimanual challenge (code and model weights).
+Copyright 2026 Saleh Alsharideh
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+-------------------------------------------------------------------------------
+LeRobot
+-------------------------------------------------------------------------------
+
+This product includes software derived from LeRobot 0.4.4
+(https://github.com/huggingface/lerobot), licensed under the Apache License,
+Version 2.0.
+Copyright 2024-2025 Tony Z. Zhao and The HuggingFace Inc. team.
+
+Modified copies of LeRobot 0.4.4 files in this repository:
+
+  submission/policy/modeling_act.py
+    Copy of lerobot policies/act/modeling_act.py (LeRobot 0.4.4), used by
+    LiftPot's model. Changes (20 lines): the import block is replaced by
+    constants and stubs, and a latent_override hook was added for an optional
+    inference mode (not enabled for any task). Apart from a 6-line comment
+    with this change notice, it is byte-identical to the submitted file
+    (SHA-1 9d869c7d...).
+
+  training/policy_v2/modeling_act.py
+    Copy of the same file, used by the GRPO code. Changes (17 lines): the
+    import block only.
+
+The model weights were trained with the unmodified LeRobot 0.4.4 package.
+
+-------------------------------------------------------------------------------
+RoboEval
+-------------------------------------------------------------------------------
+
+This product uses RoboEval (https://robo-eval.github.io/challenge.html) at the
+git tag corl2026-challenge (commit c8b79598c9fb9021652128020517d1847abe4c95)
+as an external dependency for simulation and evaluation. No RoboEval source
+file is included here. RoboEval is released under the MIT License (its README
+says "licensed under the MIT License", and the challenge organizers confirmed
+MIT); its repository's LICENSE file holds the Apache-2.0 text. MuJoCo and
+MuJoCo Menagerie (both Apache-2.0) are used through RoboEval and are not
+included here either.
+
+-------------------------------------------------------------------------------
+Data derived from RoboEval assets (hand-designed controllers)
+-------------------------------------------------------------------------------
+
+Two data files in submission/policy/ are derived from object assets released
+with RoboEval (same tag; MIT License, see above):
+
+  submission/policy/rv_valve_pts.npy
+    21,911 surface points sampled from the valve meshes
+    roboeval/envs/xmls/props/garage/handwheel_valve/assets/base_link.stl and
+    valve.stl (area-weighted samples, 2.5 mm voxel grid, valve root frame).
+
+  submission/policy/tray_mesh.npz
+    The visual mesh of roboeval/envs/xmls/props/breakfast_tray/assets/
+    wood_tray.obj (SHA-1 8b5663d29fd81b93e008b84da1037ddb0a46b0a1), 744
+    vertices and 548 triangles, scaled by 1.1 as in wood_tray.xml and written
+    in the tray body frame.
+
+The controller code also contains numeric constants read once, during
+development, from the released RoboEval scene and asset descriptions (camera
+poses and field of view, table, counter, shelf and box geometry, object
+sizes, centres of mass, spawn ranges) and from the Franka Emika Panda
+description of MuJoCo Menagerie shipped with RoboEval (gripper and hand
+dimensions, joint ranges; Apache-2.0). No file of either is copied.
+
+-------------------------------------------------------------------------------
+RoboEval demonstrations
+-------------------------------------------------------------------------------
+
+The LiftPot model was trained on the RoboEval demonstrations: Hugging Face
+dataset helen9975/roboeval_ee_delta_20hz_scaled, revision
+918b4072cd1d15f28b1f96a440ac7aa84591ce92. The demonstrations are not included
+in this repository. The dataset repository has no dataset card and no license
+tag; the challenge page (https://robo-eval.github.io/challenge.html) states
+the license as MIT and says the "benchmark, assets, and demonstrations are
+free to use".
+
+-------------------------------------------------------------------------------
+Pretrained backbone
+-------------------------------------------------------------------------------
+
+The ACT backbone was initialized from torchvision's ResNet-18 ImageNet weights
+(IMAGENET1K_V1), distributed with torchvision (BSD license). ImageNet's own
+terms apply to the ImageNet dataset.
+
+-------------------------------------------------------------------------------
+Differences from the submitted bundle
+-------------------------------------------------------------------------------
+
+submission/metadata.yaml is the submitted metadata without the contact
+e-mail. The downloaded LiftPot config.json and train_config.json have local
+paths replaced by ~/... (fields the policy never reads). With the
+modeling_act.py notice above, these are the only differences: every other
+file, including the weights, is byte-identical to the submission.

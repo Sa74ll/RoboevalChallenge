@@ -1,0 +1,9 @@
+# LiftPot weights come from Hugging Face (scripts/download_weights.sh)
+submission/checkpoint/LiftPot/*
+!submission/checkpoint/LiftPot/inference.json
+# evaluator output written into the bundle folder when --output-dir is not given
+submission/results.json
+submission/logs/
+runs/
+__pycache__/
+*.pyc

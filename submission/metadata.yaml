@@ -1,0 +1,32 @@
+team_name: "LocalModels"
+method_name: "ACT-bimanual"
+contact_email: ""
+affiliation: "Independent"
+members:
+  - "Saleh Alsharideh"
+roboeval_release: "corl2026-challenge"
+
+interface:
+  action_mode:
+    absolute: false
+    ee: true
+  control_frequency: 20
+  observation:
+    proprioception: true
+    cameras:
+      - {name: external,    resolution: [256, 256], rgb: true, depth: false}
+      - {name: front,       resolution: [256, 256], rgb: true, depth: true}
+      - {name: head,        resolution: [256, 256], rgb: true, depth: true}
+      - {name: left_wrist,  resolution: [256, 256], rgb: true, depth: false}
+      - {name: right_wrist, resolution: [256, 256], rgb: true, depth: false}
+
+policy_seed: 0
+test_time_compute: "StackTwoBlocks, RotateValve, PackBox, CubeHandover, LiftTray, PickSingleBookFromTable and StackSingleBookShelf: hybrid controllers (classical localization of the objects from depth, head camera for all, plus the front camera for five tasks and RGB for StackTwoBlocks and CubeHandover; scripted control with one or two arms; no learned model, no network forward pass); LiftPot: 1 ACT forward pass per replanning step"
+training_data:
+  roboeval_demos: true
+  additional_demos: 355
+  external_pretraining: "ImageNet1k (resnet18 backbone)"
+training_gpu_hours: 647.1
+open_source: true
+code_url: "https://github.com/Sa74ll/RoboevalChallenge"
+checkpoint_url: "https://huggingface.co/Sa74ll/LocalModels-ACT-bimanual/tree/main/pick22/checkpoint"
