@@ -2,7 +2,6 @@
 
 Entry **ACT-bimanual** by team **LocalModels** (Saleh Alsharideh, Independent) to the
 [CoRL 2026 RoboEval Diagnostic Bimanual Challenge](https://robo-eval.github.io/challenge.html).
-**Official score 0.9861**, 399 of 400 episodes successful.
 
 <p align="center"><a href="docs/controllers.md"><img src="assets/explainers.gif" width="100%"
 alt="The seven controllers: what each one perceives and how it acts"></a></p>
