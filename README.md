@@ -45,7 +45,7 @@ Official run, seeds 1000-1049, 50 episodes per task.
 | **Suite** | | **399 / 400** | **0.9861** |
 
 Per-metric scores: `results/official_results.json`. Episode logs:
-[Hugging Face](https://huggingface.co/Sa74ll/LocalModels-ACT-bimanual/tree/main/pick22_official).
+[Hugging Face](https://huggingface.co/Sa74ll/LocalModels-ACT-bimanual/tree/main/official_run).
 
 <p align="center"><img src="assets/demo.gif" width="100%" alt="The bundle solving all eight tasks"></p>
 <p align="center"><sub>All eight tasks, one episode each, seed 2000, real time.</sub></p>
@@ -89,7 +89,7 @@ allowed; the [report](report/report.pdf) (Sec. 3) lists them.
 ## Links
 
 - Report: [report/report.pdf](report/report.pdf)
-- Weights: [Sa74ll/LocalModels-ACT-bimanual](https://huggingface.co/Sa74ll/LocalModels-ACT-bimanual/tree/main/pick22)
+- Weights: [Sa74ll/LocalModels-ACT-bimanual](https://huggingface.co/Sa74ll/LocalModels-ACT-bimanual)
 - GRPO rollouts: [Sa74ll/LocalModels-ACT-bimanual-rollouts](https://huggingface.co/datasets/Sa74ll/LocalModels-ACT-bimanual-rollouts)
 
 ## License
@@ -100,11 +100,12 @@ Apache-2.0. `modeling_act.py` is modified from LeRobot (Apache-2.0); two data fi
 ## Citation
 
 ```bibtex
-@misc{alsharideh2026localmodels,
-  title        = {{LocalModels / ACT-bimanual}: Hand-Designed {RGB-D} Controllers and a Learned {ACT} Policy for the
-                  {CoRL} 2026 {RoboEval} Bimanual Challenge},
+@misc{alsharideh2026diagnose,
+  title        = {Diagnose, then Decide: From Simulator Fine-Tuning to Hybrid {RGB-D} Controllers for Bimanual
+                  {RoboEval}},
   author       = {Alsharideh, Saleh},
   year         = {2026},
+  note         = {Team LocalModels (ACT-bimanual), CoRL 2026 RoboEval Diagnostic Bimanual Challenge},
   howpublished = {\url{https://github.com/Sa74ll/RoboevalChallenge}}
 }
 ```

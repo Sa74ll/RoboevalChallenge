@@ -29,4 +29,4 @@ training_data:
 training_gpu_hours: 647.1
 open_source: true
 code_url: "https://github.com/Sa74ll/RoboevalChallenge"
-checkpoint_url: "https://huggingface.co/Sa74ll/LocalModels-ACT-bimanual/tree/main/pick22/checkpoint"
+checkpoint_url: "https://huggingface.co/Sa74ll/LocalModels-ACT-bimanual/tree/main/submission/checkpoint"

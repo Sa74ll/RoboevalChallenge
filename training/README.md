@@ -29,7 +29,8 @@ the observations.
 **Logs.** `logs/sft/train_LiftPot.log` (stage 1), `logs/grpo/p6_LiftPot/` and `logs/grpo/lp145_r2_5090/` (stage 2),
 `logs/sft/lp_exp1.log` (stage 3), `logs/grpo/lp_l2/` (stage 4). Each GRPO `log.jsonl` has one line per round
 (success rate, task score, reward). The rollouts of stage 4 are saved (seed + executed actions) in the dataset
-[Sa74ll/LocalModels-ACT-bimanual-rollouts](https://huggingface.co/datasets/Sa74ll/LocalModels-ACT-bimanual-rollouts).
+[Sa74ll/LocalModels-ACT-bimanual-rollouts](https://huggingface.co/datasets/Sa74ll/LocalModels-ACT-bimanual-rollouts)
+(run `LiftPot/grpo_02`).
 
 These are the scripts as they ran. They hard-code our machines' folder layout (names with `5090` or `tower` tell which
 machine ran them), so paths need editing before reuse. Training used the unmodified LeRobot 0.4.4 package; RoboEval
