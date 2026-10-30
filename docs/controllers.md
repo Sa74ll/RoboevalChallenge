@@ -36,8 +36,8 @@ loop), finger openings and hand poses move the phase machine on (phase loop), an
 estimate (perception loop: how often depends on the controller).
 
 **What a controller reads.** Only the observation dictionary that `act()` receives: the head and front cameras' RGB and
-depth images (256 x 256; `depth: true` in `metadata.yaml`), the joint angles (`proprioception`) and the two finger
-openings (`proprioception_grippers`, 1 open, 0 closed). Nothing is read from the simulator. Camera poses, the field of
+depth images (256 x 256; `depth: true` in `metadata.yaml`), the joint angles (`proprioception`; PackBox also the joint
+velocities) and the two finger openings (`proprioception_grippers`, 1 open, 0 closed). Nothing is read from the simulator. Camera poses, the field of
 view and the objects' geometry were read once from the released scene and assets during development and are fixed
 numbers or files in the code (see the README's "Use of simulator state").
 
@@ -56,19 +56,21 @@ from the joint angles: `hybrid_s2b.fk`. The finger opening tells whether a hand 
 
 **How the arms move.** Three styles, chosen per task:
 
-- *Saturated P-control* toward a target: each 50 ms step sends dp = clip(K_p (target - p), +-v_max) (StackTwoBlocks,
-  CubeHandover, LiftTray, and PackBox outside contact). In LiftTray the arm with less distance to go is slowed so both
-  arrive together.
+- *Saturated P-control* toward a target: each 50 ms step sends dp = clip(K_p (target - p), +-v_max) per axis
+  (StackTwoBlocks, CubeHandover, and PackBox outside contact). LiftTray caps the length of K_p (target - p) instead,
+  and slows the arm with less distance to go so both arrive together.
 - *Minimum-jerk reference segments* sent as feed-forward increments, plus a small bounded correction toward the
-  reference while it is still, against gravity sag (RotateValve, PickBook, ShelfBook).
+  reference against gravity sag (RotateValve: only while the reference is still; PickBook and ShelfBook also while it
+  moves).
 - *Feed-forward contact paths* (PackBox): a virtual command moves along the flap's arc with a servo-lag feed-forward
   term, and its aim pauses when the hand lags or tilts.
 
 **Actions.** 14 numbers per step: position and rotation deltas of the left and right end effectors (world-frame axes),
 then the two gripper commands (0 open, 1 closed).
 
-**Checks and recovery.** Every grasp is checked with the finger opening, and every controller has a retry path: re-open,
-look again, grasp again (a missed rim, a missed block, a dropped rod or book, a tray wall that slipped).
+**Checks and recovery.** Every grasp is checked with the finger opening, and every grasping controller has a retry
+path: re-open, look again, grasp again (a missed rim, a missed block, a dropped rod or book, a tray wall that slipped).
+PackBox never grasps (it pushes with closed fingers) and has no retry path; it locates the box once.
 
 **Reading the videos.** Blue is the left arm, orange the right arm; green is the controller's estimate of the object;
 dashed lines are planned paths; the trails are the finger pads' recent path (thick while pushing or holding). The
@@ -86,8 +88,9 @@ timeline colours phases by kind: free motion, push, close, hold/carry/turn, open
 **Perception** (`hybrid_s2b.locate`). Red pixels (R > 90, G < 70, B < 70) in both cameras become 3-D points between 0.9
 and 1.4 m height. Starting from the two points farthest apart, a 2-means split on x-y separates the two blocks. Each
 block's top face (points within 6 mm of its highest point) gives the centre; the yaw (mod 90 deg) is the angle of the
-smallest bounding rectangle, searched in 1 deg steps. Accuracy on 40 training seeds: 1.1 mm and 0.6 deg. While an arm
-holds a block, the estimate of the other block is refreshed whenever its top face is clearly visible.
+smallest bounding rectangle, searched in 1 deg steps. Accuracy on 40 training seeds: 1.1 mm and 0.6 deg. Every block not in
+a hand is tracked on every step: a fresh estimate within 4 cm of the last one replaces it when its top face is clearly
+visible and no hand is just above it.
 
 <p align="center"><img src="../assets/controllers/StackTwoBlocks_select.png" width="49%"> <img src="../assets/controllers/StackTwoBlocks_fit.png" width="49%"></p>
 
@@ -104,14 +107,14 @@ block, one sets its block down at a meeting point mid-table and moves away, the 
 | descend | lowers straight down | height within 6 mm, x-y within 1 cm |
 | grasp | closes for 10 steps | holding (opening 0.15-0.8): lift; otherwise reopen and approach again |
 | lift | lifts the block to carry height | at carry height |
-| wait | holds the block 14 cm from B, on its own side | the helper has let go and moved away, and B has been seen again |
+| wait | holds its block 14 cm from B, on the line from B to the held block | the helper has let go and moved away, and B has been seen again |
 | carry, lower | carries the block over B's centre, lowers it | the block rests on B (or the descent stalls) |
 | release | opens for 10 steps | success ends the episode |
 
 | Phase (helper) | What it does | Ends when |
 |---|---|---|
 | late | waits (blocks closer than 12 cm) | the stacking arm has lifted P clear |
-| approach, descend, grasp | as above, on block B | holding |
+| approach, descend, grasp | as above, on block B | holding (a miss: the helper gives up its role and moves away) |
 | hold | keeps B gripped in place | the stacking arm has held P for 3 steps |
 | release, rise, home | opens, rises clear, steps 12 cm aside | out of the way |
 
@@ -145,7 +148,7 @@ T = max(0.7 s, 0.5 s + 5 s/m x the longer distance), on minimum-jerk paths, so t
 | reach | opens, moves the hand above the wheel, pads 3.5 cm above their grasp height | path done, fingers open, x-y within 4 mm of the wheel axis |
 | descend | lowers the pads around the rim in 0.8 s | height within 1.5 mm and x-y within 4 mm |
 | close | closes for 10 steps | opening 0.45-0.92 (rim between the pads): turn; otherwise retry (at most twice) |
-| retry | opens and rises 3.5 cm | descends again |
+| retry | opens and rises 3.5 cm | reaches again, then descends |
 | turn | rotates the hand 36 deg about the vertical through the wheel axis in 1.6 s | turn done |
 | hold | keeps the grasp | success; or 1.2 s without success: turn 20 deg more (up to 3 times) |
 
@@ -174,14 +177,14 @@ the flap's outer face. Each arm holds its own flap on the way (the left arm the 
 
 **Plan.** For each arm, a push position along the hinge (-0.18 to 0.18 m) whose largest shoulder-to-wrist distance
 over the whole path is comfortable (below 0.70 m). Parallel mode if both arms can push comfortably 0.30 m apart; else
-sequenced mode: the arm with the easier reach goes first, and the other waits at its run-in point until the first flap
-passes 130 deg. If no position is comfortable (far boxes turned about 30 deg), the hand is rolled up to 28 deg during
+sequenced mode: the arm with the easier reach goes first, and the other waits at its run-in point until the first arm's
+push has advanced its aim past 130 deg. If no position is comfortable (far boxes turned about 30 deg), the hand is rolled up to 28 deg during
 the early lift.
 
 | Phase (each arm) | What it does | Ends when |
 |---|---|---|
 | transit | free motion to 3 cm above the open flap's tip, fingers closed | within 2 cm |
-| descend | to the run-in point beside the tip (sequenced mode: the second arm waits here, its height following the first arm's) | within 8 mm (and, for the second arm, the first flap past 130 deg) |
+| descend | to the run-in point beside the tip (sequenced mode: the second arm waits here, its height following the first arm's) | within 8 mm (and, for the second arm, the first arm's aim past 130 deg) |
 | push | the aim angle advances 2.5 deg per step along the flap's arc; it pauses while the hand lags by more than 8 mm or tilts by more than 4 deg, but never stops past 95 deg unless overloaded | the end of the path (180.8 deg) is reached and held |
 | hold | presses the closed flap and holds still | sequenced mode, first arm: lets go at once |
 | release, away | opens, rises 4 cm, moves to its own side | the episode ends when both flaps are closed |
@@ -215,7 +218,7 @@ stays below the human demonstrations' median.
 | descend | giver | straight down onto the rod | height and x-y within 6 mm (blocked or 45 steps: reopen) |
 | grasp | giver | closes | holding for 2 steps: lift (15 steps without: reopen) |
 | lift | giver | straight up, then to the handover pose, turning the rod | at the pose: hold |
-| approach | receiver | waits at its waiting point | the rod is at the handover pose (within 1.5 cm and 5 deg) |
+| approach | receiver | waits at its waiting point | the giver holds the rod at its pose, and the receiver is within 1.5 cm and 5 deg of its waiting point |
 | insert | receiver | slides in along the rod axis, fingers open | within 6 mm of its grasp point (blocked or 60 steps: back out, retry) |
 | grasp, hold | receiver | closes, holds | holding for 2 steps |
 | release | giver | opens | success: only the receiver holds the rod, off the table |
@@ -247,7 +250,7 @@ distance saturates both shoulders and wrists, and the tray only tilts; about 20 
 | Phase (both arms together) | What it does | Ends when |
 |---|---|---|
 | approach | above the end walls, fingers open, hand turned across the wall | both within 1 cm and 4 deg |
-| descend | pads 2.1-4.5 cm below the wall top | both within 5 mm |
+| descend | pads 1.6-4.0 cm below the wall top | both within 5 mm |
 | grasp, ready | closes | both holding (0.15-0.8) for 2 steps; a miss: both retry |
 | lift | pulls to tray centre x = 0.345 m while rising 12 cm | success; after 55 steps without it, the tray is set back down (grasp kept) and pulled again from there |
 | setdown, retry | if a wall slips out of a hand: both hands go down, open, rise, the tray is perceived again | both grasp again |
@@ -265,7 +268,7 @@ the book, where it overhangs the counter's front edge.
 
 **Perception** (`pk_perception.py`, head depth only: the front camera looks at the back of the bookshelf). The book's top
 face is the dominant height 2-4 cm above the counter. The pose (x, y, yaw) is registered to a template of the book's
-top outline: the 9.39 x 13.82 cm main block plus the ribbon bookmark (7 mm wide, 2.6 cm out of one end), which makes the
+top outline: the 9.39 x 13.82 cm main block plus the ribbon bookmark (a 9.5 mm x 2.55 cm strip out of one end), which makes the
 outline asymmetric and resolves the 180 deg ambiguity of a rectangle. Score = top points inside the outline + 2 x side
 points on its edge (the side faces facing the camera, 6-20 mm above the bottom) - 2 x side points deep inside - 3 x
 template points that the camera sees through. Without the side term the fit slid 4.7 mm toward the camera. The search
@@ -276,7 +279,7 @@ starts from the top face's minimum-area rectangle (all four axis assignments) an
 **Plan.** If no edge or corner overhangs enough for a pinch, one arm first pushes the book toward the robot with the
 hand tilted (8 of the seeds 900000-900019 needed this; in the video's episode the push is 5.2 cm). The pushing hand
 then moves out of the head camera's view, the book is perceived again, and the pinch is planned on the new pose: the
-hand tilted 40 deg, lower pad under the overhanging bottom edge, upper pad on the top face. A planning IK (`pk_ik.py`)
+hand tilted 40 deg (46 deg if no 40 deg plan passes), lower pad under the overhanging bottom edge, upper pad on the top face. A planning IK (`pk_ik.py`)
 follows each candidate path from the current joint angles and rejects paths that bring a joint near its limit or a link
 under the bookshelf's lower board.
 
@@ -309,8 +312,8 @@ and waits. The book is pinched across its thickness at the spine, under its cent
 the counter's front edge by at least 15 mm. If it does not, the arm pushes the book's far face toward the robot with
 the front finger of the open gripper (one finger touches, so the gripper never "holds" the book), to a 21 mm overhang;
 the hand crosses over the book pitched 25 deg forward and pushes pitched 15 deg, clear of the lower shelf board. A
-planning IK checks every candidate path for joint-range margin, and a box model of the hand checks it against the book,
-the counter and the shelf boards.
+planning IK checks every candidate path for joint-range margin, and after a push a box model of the hand raises the
+approach to the pinch until it clears the book, the counter and the shelf boards by 8 mm.
 
 | Phase | What it does | Ends when |
 |---|---|---|
@@ -329,9 +332,10 @@ the counter and the shelf boards.
 ## Limits
 
 - Each controller is built for its task's scene and spawn ranges; it is not a general method.
-- Four controllers keep a development hook through which a test harness could inject ground truth
-  (`HybridRV.wheels_override`, `HybridLT.oracle`, `HybridPK.book_source`, `HybridSS.book_source`). Each is `None` in
-  the constructor, cannot be set from `hybrid.json`, and nothing in the bundle sets it.
+- Four controllers keep development hooks through which a test harness could inject ground truth or force a choice
+  (`HybridRV.wheels_override`, `HybridLT.oracle`, `HybridPK.book_source`, `HybridSS.book_source`,
+  `HybridSS.force_pinch`). Each is `None` in the constructor, cannot be set from `hybrid.json`, and nothing in the
+  bundle sets it.
 - PickBook pushes the book with closed fingers. In a failed episode the scorer can count that push as "holding", which
   earns task-progression credit without a grasp.
 
