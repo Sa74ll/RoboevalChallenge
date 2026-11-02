@@ -23,6 +23,7 @@ except ImportError:
     from inference import ACTInference  # harness context: policy/ is on sys.path
 try:  # hand-designed controllers (classical RGB-D perception + scripted control), selected by checkpoint/<family>/hybrid.json
     from .hybrid_s2b3 import HybridS2B3
+    from .hybrid_s2b4 import HybridS2B4
     from .hybrid_rv import HybridRV
     from .hybrid_pb import HybridPB
     from .hybrid_ch import HybridCH
@@ -31,13 +32,14 @@ try:  # hand-designed controllers (classical RGB-D perception + scripted control
     from .hybrid_ss import HybridSS
 except ImportError:
     from hybrid_s2b3 import HybridS2B3
+    from hybrid_s2b4 import HybridS2B4
     from hybrid_rv import HybridRV
     from hybrid_pb import HybridPB
     from hybrid_ch import HybridCH
     from hybrid_lt import HybridLT
     from hybrid_pk import HybridPK
     from hybrid_ss import HybridSS
-HYBRIDS = {"hybrid_s2b3": HybridS2B3, "hybrid_rv": HybridRV, "hybrid_pb": HybridPB, "hybrid_ch": HybridCH, "hybrid_lt": HybridLT, "hybrid_pk": HybridPK, "hybrid_ss": HybridSS}
+HYBRIDS = {"hybrid_s2b3": HybridS2B3, "hybrid_s2b4": HybridS2B4, "hybrid_rv": HybridRV, "hybrid_pb": HybridPB, "hybrid_ch": HybridCH, "hybrid_lt": HybridLT, "hybrid_pk": HybridPK, "hybrid_ss": HybridSS}
 class _Policy:
     def __init__(self, checkpoint_dir):
         self._checkpoint_dir = Path(checkpoint_dir)

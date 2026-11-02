@@ -1,1 +1,1 @@
-{"policy": "hybrid_s2b3"}
+{"policy": "hybrid_s2b4", "cfg": {"HOLD_T": 1, "RISE": 0.15}}

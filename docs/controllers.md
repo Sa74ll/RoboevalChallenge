@@ -11,7 +11,7 @@ The GIF in each section is the episode part only, at full speed.
 
 | Task | Explainer video | Controller code | Official run (50 seeds) |
 |---|---|---|---|
-| [StackTwoBlocks](#stacktwoblocks) | [StackTwoBlocks.mp4](../assets/videos/StackTwoBlocks.mp4) | `hybrid_s2b3.py`, `hybrid_s2b.py` | 50/50, score 0.948 |
+| [StackTwoBlocks](#stacktwoblocks) | [StackTwoBlocks.mp4](../assets/videos/StackTwoBlocks.mp4) | `hybrid_s2b4.py` (= `hybrid_s2b3.py` with options), `hybrid_s2b.py` | 50/50, score 0.953 |
 | [RotateValve](#rotatevalve) | [RotateValve.mp4](../assets/videos/RotateValve.mp4) | `hybrid_rv.py`, `rv_perception.py` | 50/50, score 1.000 |
 | [PackBox](#packbox) | [PackBox.mp4](../assets/videos/PackBox.mp4) | `hybrid_pb.py` | 49/50, score 0.954 |
 | [CubeHandover](#cubehandover) | [CubeHandover.mp4](../assets/videos/CubeHandover.mp4) | `hybrid_ch.py`, `rod_perc.py` | 50/50, score 1.000 |
@@ -115,7 +115,7 @@ block, one sets its block down at a meeting point mid-table and moves away, the 
 |---|---|---|
 | late | waits (blocks closer than 12 cm) | the stacking arm has lifted P clear |
 | approach, descend, grasp | as above, on block B | holding (a miss: the helper gives up its role and moves away) |
-| hold | keeps B gripped in place | the stacking arm has held P for 3 steps |
+| hold | keeps B gripped in place | the stacking arm has held P for 1 step (`HOLD_T` in `hybrid.json`; 3 before Nov 2) |
 | release, rise, home | opens, rises clear, steps 12 cm aside | out of the way |
 
 ## RotateValve

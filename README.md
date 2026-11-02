@@ -34,14 +34,14 @@ Official run, seeds 1000-1049, 50 episodes per task.
 | Task | Policy | Successes | Score |
 |---|---|---|---|
 | CubeHandover | controller | 50 | 1.000 |
-| LiftPot | ACT ([training](training/README.md)) | 50 | 0.999 |
+| LiftPot | ACT ([training](training/README.md)) | 49 | 0.982 |
 | LiftTray | controller | 50 | 1.000 |
 | PackBox | controller | 49 | 0.954 |
 | PickSingleBookFromTable | controller | 50 | 0.987 |
 | RotateValve | controller | 50 | 1.000 |
 | StackSingleBookShelf | controller | 50 | 1.000 |
-| StackTwoBlocks | controller | 50 | 0.948 |
-| **Suite** | | **399 / 400** | **0.9861** |
+| StackTwoBlocks | controller | 50 | 0.953 |
+| **Suite** | | **398 / 400** | **0.9845** |
 
 Per-metric scores: `results/official_results.json`. Episode logs:
 [Hugging Face](https://huggingface.co/Sa74ll/LocalModels-ACT-bimanual/tree/main/official_run).
