@@ -16,7 +16,7 @@ The GIF in each section is the episode part only, at full speed.
 | [PackBox](#packbox) | [PackBox.mp4](../assets/videos/PackBox.mp4) | `hybrid_pb.py` | 49/50, score 0.954 |
 | [CubeHandover](#cubehandover) | [CubeHandover.mp4](../assets/videos/CubeHandover.mp4) | `hybrid_ch.py`, `rod_perc.py` | 50/50, score 1.000 |
 | [LiftTray](#lifttray) | [LiftTray.mp4](../assets/videos/LiftTray.mp4) | `hybrid_lt.py`, `lt_perc.py` | 50/50, score 1.000 |
-| [PickSingleBookFromTable](#picksinglebookfromtable-pickbook) | [PickSingleBookFromTable.mp4](../assets/videos/PickSingleBookFromTable.mp4) | `hybrid_pk.py`, `pk_perception.py`, `pk_ik.py` | 50/50, score 0.987 |
+| [PickSingleBookFromTable](#picksinglebookfromtable-pickbook) | [PickSingleBookFromTable.mp4](../assets/videos/PickSingleBookFromTable.mp4) | `hybrid_pk.py`, `pk_perception.py`, `pk_ik.py` | 50/50, score 0.988 |
 | [StackSingleBookShelf](#stacksinglebookshelf-shelfbook) | [StackSingleBookShelf.mp4](../assets/videos/StackSingleBookShelf.mp4) | `hybrid_ss.py`, `ss_perc.py`, `ss_ik.py`, `ss_lib.py` | 50/50, score 1.000 |
 
 The episodes in the videos use training seed 900000 (PickBook: 900001, the first of seeds 900000-900019 whose book had
