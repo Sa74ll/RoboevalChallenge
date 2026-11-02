@@ -299,7 +299,7 @@ TASKS = {
                    back=[("grasp", "approach", "missed: reopen, look again", "g", "eye")]),
               dict(label="helper\narm", start=True,
                    seq=["approach", "descend", "grasp", ("holding", "g"), "hold",
-                        ("stacker holds\nits block 3 steps", "a"), "release", "rise", "home"])],
+                        ("stacker holds\nits block 1 step", "a"), "release", "rise", "home"])],
     ),
     "RotateValve": dict(
         perceive=["valve model (21,911 pts)", "fit to depth: x, y, yaw", "per valve → wheel centre"],

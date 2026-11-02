@@ -16,12 +16,14 @@ The GIF in each section is the episode part only, at full speed.
 | [PackBox](#packbox) | [PackBox.mp4](../assets/videos/PackBox.mp4) | `hybrid_pb.py` | 49/50, score 0.954 |
 | [CubeHandover](#cubehandover) | [CubeHandover.mp4](../assets/videos/CubeHandover.mp4) | `hybrid_ch.py`, `rod_perc.py` | 50/50, score 1.000 |
 | [LiftTray](#lifttray) | [LiftTray.mp4](../assets/videos/LiftTray.mp4) | `hybrid_lt.py`, `lt_perc.py` | 50/50, score 1.000 |
-| [PickSingleBookFromTable](#picksinglebookfromtable-pickbook) | [PickSingleBookFromTable.mp4](../assets/videos/PickSingleBookFromTable.mp4) | `hybrid_pk.py`, `pk_perception.py`, `pk_ik.py` | 50/50, score 0.988 |
+| [PickSingleBookFromTable](#picksinglebookfromtable-pickbook) | [PickSingleBookFromTable.mp4](../assets/videos/PickSingleBookFromTable.mp4) | `hybrid_pk.py`, `pk_perception.py`, `pk_ik.py` | 50/50, score 0.991 |
 | [StackSingleBookShelf](#stacksinglebookshelf-shelfbook) | [StackSingleBookShelf.mp4](../assets/videos/StackSingleBookShelf.mp4) | `hybrid_ss.py`, `ss_perc.py`, `ss_ik.py`, `ss_lib.py` | 50/50, score 1.000 |
 
 The episodes in the videos use training seed 900000 (PickBook: 900001, the first of seeds 900000-900019 whose book had
 to be pushed before the pinch), the same episodes as Fig. 2 of the [report](../report/report.pdf). They run the
-submitted code through the evaluator's episode loop.
+code through the evaluator's episode loop as it was before the final tuning on Nov 2, which changed two things, both
+chosen on training seeds: StackTwoBlocks' helper now lets go one step after both blocks are held (was three) and rises
+15 cm (was 17 cm); PickBook's reach, insertion, close and lift are faster (`hybrid.json` settings).
 
 <p align="center"><img src="../assets/controllers.png" width="100%" alt="The seven controllers"></p>
 <p align="center"><sub>One training-seed episode per controller: head camera at the start, the fitted object model
@@ -291,7 +293,7 @@ under the bookshelf's lower board.
 | p_off, p_up, p_clear | backs off, rises, moves out of the camera's view | the book is perceived again and the pinch planned |
 | g_reach | the pinching hand to the pre-pinch pose | at the pose (else a new attempt) |
 | g_insert | slides in under the edge | within 3 mm of the pinch pose |
-| g_close | closes for 8 steps | opening below 0.12 (closed on nothing): retry; else lift |
+| g_close | closes for 6 steps | opening below 0.12 (closed on nothing): retry; else lift |
 | g_lift, g_hold | lifts the book 20 cm, holds | success |
 
 ## StackSingleBookShelf (ShelfBook)
